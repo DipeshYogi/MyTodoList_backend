@@ -13,7 +13,10 @@ class TaskViewSet(viewsets.ModelViewSet):
 
   def get_permissions(self):
     if self.request.method == 'PUT':
-      self.permission_classes = [IsTaskOwner,]
+      self.permission_classes = [IsTaskOwner, permissions.IsAuthenticated]
+    elif self.request.method == 'GET':
+      self.permission_classes = [permissions.IsAuthenticated,]
+    
     return super().get_permissions()
 
   def get_serializer_class(self):

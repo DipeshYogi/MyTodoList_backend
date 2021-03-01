@@ -1,0 +1,8 @@
+Django==3.1.6
+django-cors-headers==3.7.0
+django-rest-knox==4.1.0
+djangorestframework==3.12.2
+factory-boy==3.2.0
+celery==4.4.1
+redis==3.4.1
+
