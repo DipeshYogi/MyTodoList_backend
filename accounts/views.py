@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 from rest_framework.generics import GenericAPIView
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.response import Response
 from knox.models import AuthToken
+from django.contrib.auth import get_user_model
 
 
 class RegisterView(GenericAPIView):
@@ -28,4 +29,18 @@ class LoginView(GenericAPIView):
                        'token':AuthToken.objects.create(user)[1]}, \
                         status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserUpdateView(GenericAPIView):
+  serializer_class = UserSerializer
+  permission_classes = [permissions.IsAuthenticated,]
+
+  def put(self, request):
+    instance = get_user_model().objects.get(pk = request.user.id)
+    serializer = self.serializer_class(instance, data=request.data, \
+                                       partial=True)
+    if serializer.is_valid():
+      serializer.save()
+      return Response(serializer.data, status = status.HTTP_200_OK)
+    return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
     

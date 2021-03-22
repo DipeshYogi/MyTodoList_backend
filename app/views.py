@@ -22,6 +22,8 @@ class TaskViewSet(viewsets.ModelViewSet):
   def get_serializer_class(self):
     if self.action in ('create', 'update'):
       return TaskSerializer
+    # elif self.action == 'update':
+    #   return TaskSerializer(partial=True)
     else:
       return TaskInfoSerializer 
 

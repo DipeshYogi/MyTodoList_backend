@@ -20,4 +20,5 @@ urlpatterns = [
     path('todo-admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('app/', include('app.urls')),
+    path('reddit/', include('reddit.urls'))
 ]
