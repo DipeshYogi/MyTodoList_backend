@@ -7,7 +7,7 @@ import pytz
 
 # field validators
 def scheduled_date_validate(value):
-  if value <= pytz.UTC.localize(datetime.datetime.now()):
+  if value <= pytz.timezone("Asia/Kolkata").localize(datetime.datetime.now()):
     raise ValidationError('Scheduled date & time should be greater than \
                            current date & time')
   else:
