@@ -10,13 +10,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(os.environ.get('DEBUG', default = 0))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS').split(' ')
 
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -68,18 +65,20 @@ WSGI_APPLICATION = 'todo.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': os.environ.get('SQL_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': os.environ.get('POSTGRES_DB', os.path.join(BASE_DIR, 'db.sqlite3')),
+        'USER': os.environ.get('POSTGRES_USER', 'user'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'password'),
+        'HOST': os.environ.get('SQL_HOST', 'localhost'),
+        'PORT': os.environ.get('SQL_PORT', '5432')
     }
 }
 
 
 # Password validation
-# https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -118,6 +117,16 @@ REST_FRAMEWORK = {
   'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',)
 }
 
+# Redis caching settings
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
 
 # CELERY_BROKER_URL = "redis://redis:6379"
 # CELERY_RESULT_BACKEND = "redis://redis:6379"
@@ -142,7 +151,8 @@ REST_FRAMEWORK = {
 # EMAIL_HOST_PASSWORD = 'aafuvjcbpuqybksx'
 
 
-STATIC_URL = '/static/'
+STATIC_URL = '/staticfiles/'
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'

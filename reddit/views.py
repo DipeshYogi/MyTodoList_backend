@@ -5,6 +5,8 @@ from .models import Posts, Tags, Like, Comment, CommentLike
 from .serializers import PostSerializer, LikeSerializer, PostCreateSerializer,\
                          GetPostSerializer, CommentSerializer, GetCommentSerializer,\
                          GetCommentLikeSerializer, PostCommentLikeSerializer                         
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 
 class PostViewSets(viewsets.ViewSet):
@@ -17,6 +19,7 @@ class PostViewSets(viewsets.ViewSet):
     else:
       return PostSerializer
 
+  @method_decorator(cache_page(60*5))
   def list(self, request):
     queryset = Posts.objects.all()
     serializer = GetPostSerializer(queryset, many=True)

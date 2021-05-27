@@ -1,0 +1,44 @@
+FROM python:3.9-alpine as builder
+
+WORKDIR /usr/src/app
+
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
+
+RUN apk update && pip install --upgrade pip
+
+COPY . .
+
+# COPY ./requirements.txt .
+
+RUN apk add --no-cache --virtual .build-deps \
+    ca-certificates gcc postgresql-dev linux-headers musl-dev \
+    libffi-dev jpeg-dev zlib-dev \
+    && apk add libjpeg \
+    && apk add  libpq \
+    && pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt \
+    && apk del .build-deps
+
+# FINAL
+FROM python:3.9-alpine
+
+RUN adduser -D dipesh
+
+WORKDIR /usr/src/app
+RUN mkdir /usr/src/app/staticfiles
+
+RUN apk update && apk add libpq && apk add jpeg-dev \
+    && apk add libjpeg && pip install --upgrade pip
+COPY --from=builder /usr/src/app/wheels /wheels
+COPY --from=builder /usr/src/app/requirements.txt .
+RUN pip install --no-cache /wheels/*
+
+COPY . .
+
+RUN chown -R dipesh /usr/src/app
+
+USER dipesh
+
+ENTRYPOINT [ "/usr/src/app/entrypoint.sh" ]
+
+CMD gunicorn todo.wsgi:application --bind 0.0.0.0:$PORT

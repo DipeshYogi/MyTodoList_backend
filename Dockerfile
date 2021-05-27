@@ -1,25 +1,27 @@
-FROM python:3.8.7
+FROM python:3.9-alpine
 
 WORKDIR /usr/src/app
 
-ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
 
-# RUN apk update \
-#     && apk add --virtual build-deps gcc python3-dev musl-dev \
-#     && apk add postgresql-dev \
-#     && pip install psycopg2 \
-#     && apk add jpeg-dev zlib-dev libjpeg \
-#     && pip install Pillow \
-#     && apk del build-deps
+RUN apk update && pip install --upgrade pip
 
-RUN pip install --upgrade pip
 COPY ./requirements.txt .
-RUN pip install -r requirements.txt 
+
+RUN apk add --no-cache --virtual .build-deps \
+    ca-certificates gcc postgresql-dev linux-headers musl-dev \
+    libffi-dev jpeg-dev zlib-dev \
+    && apk add libjpeg \
+    && apk add  libpq \
+    && pip install -r requirements.txt \
+    # && pip install Pillow \
+    # && pip install psycopg2 \
+    && apk del .build-deps
 
 COPY . .
 
-# RUN python manage.py collectstatic --noinput
-
-RUN adduser dipesh
+RUN adduser -D dipesh
 USER dipesh
+
+ENTRYPOINT [ "/usr/src/app/entrypoint.sh" ]
